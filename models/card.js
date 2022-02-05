@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const ObjectId = mongoose.Types.ObjectId();
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -12,12 +14,10 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   owner: {
-    // eslint-disable-next-line no-undef
     type: ObjectId,
     required: true,
   },
   likes: {
-    // eslint-disable-next-line no-undef
     type: ObjectId,
     default: [],
   },
@@ -27,4 +27,4 @@ const cardSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('card', cardSchema);
+module.exports = mongoose.model('Card', cardSchema);
