@@ -14,8 +14,10 @@ const { PORT = 3000 } = process.env;
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  // eslint-disable-next-line no-console
-  console.log(req.method, req.path);
+  req.user = {
+    _id: '61fe8d598ab5a1890f0560eb',
+  };
+
   next();
 });
 
