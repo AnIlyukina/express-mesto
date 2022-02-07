@@ -1,13 +1,12 @@
 const express = require('express');
 
+const path = require('path');
+
 const mongoose = require('mongoose');
 
 const { routes } = require('./routes');
 
 const app = express();
-
-// eslint-disable-next-line import/order
-const path = require('path');
 
 const { PORT = 3000 } = process.env;
 
@@ -30,7 +29,6 @@ async function main() {
   });
 
   await app.listen(PORT);
-  // eslint-disable-next-line no-console
   console.log('сервер запущен');
 }
 

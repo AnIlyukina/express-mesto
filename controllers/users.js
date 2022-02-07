@@ -17,7 +17,6 @@ exports.getUserById = async (req, res) => {
     } else {
       res.status(404).send({ message: 'Пользователь не найден' });
     }
-  // eslint-disable-next-line no-empty
   } catch (err) {
     res.status(500).send({ message: 'Произошла ошибка' });
   }
@@ -34,11 +33,8 @@ exports.createUser = async (req, res) => {
 
 exports.updateUserInfo = async (req, res) => {
   const { name, about } = req.body;
-
   try {
-    // eslint-disable-next-line new-cap
     const userInfo = await User.findByIdAndUpdate(
-      // eslint-disable-next-line no-underscore-dangle
       req.user._id,
       { name, about },
       { new: true },
@@ -51,9 +47,7 @@ exports.updateUserInfo = async (req, res) => {
 
 exports.updateUserAvatar = async (req, res) => {
   try {
-    // eslint-disable-next-line new-cap
     const userAvatar = await User.findByIdAndUpdate(
-      // eslint-disable-next-line no-underscore-dangle
       req.user._id,
       { avatar: req.body.avatar },
       { new: true },
