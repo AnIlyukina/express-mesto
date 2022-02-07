@@ -25,9 +25,8 @@ exports.createCard = async (req, res) => {
 };
 
 exports.deleteCard = async (req, res) => {
-  console.log('3');
   try {
-    const card = await Card.findById(req.params.cardId);
+    const card = await Card.findByIdAndDelete(req.params.cardId);
     res.status(200).send(card);
   // eslint-disable-next-line no-empty
   } catch (err) {
