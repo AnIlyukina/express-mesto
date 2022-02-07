@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const ObjectId = mongoose.Types.ObjectId();
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -14,13 +13,13 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   owner: {
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
-  likes: {
-    type: ObjectId,
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
     default: [],
-  },
+  }],
   createdAt: {
     type: Date,
     default: Date.now,
