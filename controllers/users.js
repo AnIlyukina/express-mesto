@@ -20,8 +20,9 @@ exports.getUserById = async (req, res) => {
   } catch (err) {
     if (err.name === 'CastError') {
       res.status(400).send({ message: 'Переданы невалидные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 

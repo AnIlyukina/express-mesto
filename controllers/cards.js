@@ -20,17 +20,26 @@ exports.createCard = async (req, res) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       res.status(400).send({ message: 'Переданы невалидные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
 exports.deleteCard = async (req, res) => {
   try {
     const card = await Card.findByIdAndDelete(req.params.cardId);
-    res.status(200).send(card);
+    if (card) {
+      res.status(200).send(card);
+    } else {
+      res.status(404).send({ message: 'Пользователь не найден' });
+    }
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Невалидный id ' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    }
   }
 };
 
@@ -39,11 +48,19 @@ exports.likeCard = async (req, res) => {
     const cardLike = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
-      { new: true },
+      { new: true, runValidators: true },
     );
-    res.send(cardLike);
+    if (cardLike) {
+      res.status(200).send(cardLike);
+    } else {
+      res.status(404).send({ message: 'Пользователь не найден' });
+    }
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Невалидный id ' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    }
   }
 };
 
@@ -52,10 +69,18 @@ exports.dislikeCard = async (req, res) => {
     const cardDislike = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
-      { new: true },
+      { new: true, runValidators: true },
     );
-    res.send(cardDislike);
+    if (cardDislike) {
+      res.status(200).send(cardDislike);
+    } else {
+      res.status(404).send({ message: 'Пользователь не найден' });
+    }
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Невалидный id ' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    }
   }
 };
