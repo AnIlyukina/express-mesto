@@ -5,7 +5,7 @@ exports.getCards = async (req, res) => {
     const cards = await Card.find({});
     res.status(200).send(cards);
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -18,7 +18,10 @@ exports.createCard = async (req, res) => {
     });
     res.status(201).send(await card.save());
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы невалидные данные' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -27,7 +30,7 @@ exports.deleteCard = async (req, res) => {
     const card = await Card.findByIdAndDelete(req.params.cardId);
     res.status(200).send(card);
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -40,7 +43,7 @@ exports.likeCard = async (req, res) => {
     );
     res.send(cardLike);
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -53,6 +56,6 @@ exports.dislikeCard = async (req, res) => {
     );
     res.send(cardDislike);
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
