@@ -33,8 +33,9 @@ exports.createUser = async (req, res) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       res.status(400).send({ message: 'Переданы невалидные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -50,8 +51,9 @@ exports.updateUserInfo = async (req, res) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       res.status(400).send({ message: 'Переданы невалидные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -66,7 +68,8 @@ exports.updateUserAvatar = async (req, res) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       res.status(400).send({ message: 'Переданы невалидные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка на сервере' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
