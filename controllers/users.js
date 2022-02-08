@@ -5,7 +5,7 @@ exports.getUsers = async (req, res) => {
     const users = await User.find({});
     res.status(200).send(users);
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка' });
+    res.status(500).send({ message: err.message });
   }
 };
 
@@ -18,7 +18,10 @@ exports.getUserById = async (req, res) => {
       res.status(404).send({ message: 'Пользователь не найден' });
     }
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка' });
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: err.message });
   }
 };
 
@@ -27,7 +30,10 @@ exports.createUser = async (req, res) => {
     const user = new User(req.body);
     res.status(201).send(await user.save());
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка' });
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: err.message });
   }
 };
 
@@ -41,6 +47,9 @@ exports.updateUserInfo = async (req, res) => {
     );
     res.send(userInfo);
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
     res.status(500).send({ message: err.message });
   }
 };
@@ -54,6 +63,9 @@ exports.updateUserAvatar = async (req, res) => {
     );
     res.send(userAvatar);
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка' });
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: err.message });
   }
 };
