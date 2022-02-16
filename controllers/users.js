@@ -1,3 +1,7 @@
+// eslint-disable-next-line import/no-unresolved
+const bcrypt = require('bcryptjs');
+// eslint-disable-next-line import/no-unresolved
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 exports.getUsers = async (req, res) => {
@@ -28,7 +32,11 @@ exports.getUserById = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    const user = new User(req.body);
+    const { body } = req;
+    const user = new User(body);
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password, salt);
+
     res.status(201).send(await user.save());
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -71,5 +79,22 @@ exports.updateUserAvatar = async (req, res) => {
     } else {
       res.status(500).send({ message: 'Произошла ошибка на сервере' });
     }
+  }
+};
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const userEmail = await User.findUserByCredentials(email, password);
+    if (userEmail) {
+      const token = jwt.sign(
+        { _id: userEmail._id },
+        'some-secret-key',
+        { expiresIn: '7d' },
+      );
+      res.send({ token });
+    }
+  } catch (err) {
+    res.status(401).send({ message: err.message });
   }
 };

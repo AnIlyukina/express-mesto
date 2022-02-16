@@ -10,14 +10,6 @@ const app = express();
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '61fe8d598ab5a1890f0560eb',
-  };
-
-  next();
-});
-
 app.use(routes);
 
 async function main() {
