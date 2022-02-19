@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 // eslint-disable-next-line import/no-unresolved
 const bcrypt = require('bcryptjs');
 
@@ -20,12 +21,24 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: false,
+    validate: {
+      validator(link) {
+        return validator.isURL(link);
+      },
+      message: 'Некорректный URL',
+    },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {
     type: String,
     required: true,
     unique: true,
+    validate: {
+      validator(email) {
+        return validator.isEmail(email);
+      },
+      message: 'Некорректный Email',
+    },
   },
   password: {
     type: String,

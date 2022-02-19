@@ -1,5 +1,5 @@
 const express = require('express');
-const auth = require('../middlewares/auth');
+// const auth = require('../middlewares/auth');
 const { createUser, login } = require('../controllers/users');
 
 const { userRoutes } = require('./users');
@@ -11,7 +11,7 @@ const routes = express.Router();
 routes.post('/signup', createUser);
 routes.post('/signin', login);
 
-routes.use(auth);
+// routes.use(auth);
 
 routes.use('/users', userRoutes);
 routes.use('/cards', cardsRoutes);
