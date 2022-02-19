@@ -4,6 +4,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+const MONGO_DUPLICATE_ERROR_CODE = 11000;
+const SOLT_ROUND = 10;
+
 exports.getUsers = async (req, res) => {
   try {
     const users = await User.find({});
@@ -30,20 +34,28 @@ exports.getUserById = async (req, res) => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 exports.createUser = async (req, res) => {
   try {
     const { body } = req;
-    const user = new User(body);
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
 
-    res.status(201).send(await user.save());
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      res.status(400).send({ message: 'Переданы невалидные данные' });
-    } else {
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    if (!body.email || !body.password) {
+      res.status(400).send({ message: 'Не верный email или пароль' });
     }
+
+    const salt = await bcrypt.genSalt(SOLT_ROUND);
+    body.password = await bcrypt.hash(body.password, salt);
+    const user = await User.create(body);
+
+    res.status(201).send(user);
+  } catch (err) {
+    if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+      return res.status(409).send({ message: 'Такой пользователь уже существует' });
+    }
+    if (err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Переданы невалидные данные', error: err });
+    }
+    res.status(500).send({ message: 'Произошла ошибка на сервере', error: err });
   }
 };
 
@@ -89,7 +101,7 @@ exports.login = async (req, res) => {
     if (userEmail) {
       const token = jwt.sign(
         { _id: userEmail._id },
-        'some-secret-key',
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
       res.send({ token });

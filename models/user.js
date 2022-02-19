@@ -30,23 +30,23 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 8,
-    // select: false,
+    minlength: [8, 'Минимальная длина пароля 8 символов'],
+    select: false,
   },
 });
 
 // eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = async function (email, password) {
-  const userEmail = await this.findOne({ email });
-  if (!userEmail) {
+  const user = await this.findOne({ email }).select('+password');
+  if (!user) {
     return Promise.reject(new Error('Неправильные почта или пароль'));
   }
-  const matched = await bcrypt.compare(password, userEmail.password);
+  const matched = await bcrypt.compare(password, user.password);
   if (!matched) {
     return Promise.reject(new Error('Неправильные почта или пароль'));
   }
 
-  return userEmail;
+  return user;
 };
 
 module.exports = mongoose.model('User', userSchema);

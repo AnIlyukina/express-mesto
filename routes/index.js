@@ -10,9 +10,11 @@ const routes = express.Router();
 
 routes.post('/signup', createUser);
 routes.post('/signin', login);
+
 routes.use(auth);
+
 routes.use('/users', userRoutes);
-routes.use('/cards', auth, cardsRoutes);
+routes.use('/cards', cardsRoutes);
 
 routes.use((req, res) => {
   res.status(404).send({ message: `Aдреса ${req.path} не существует` });
