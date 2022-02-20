@@ -2,45 +2,47 @@
 const bcrypt = require('bcryptjs');
 // eslint-disable-next-line import/no-unresolved
 const jwt = require('jsonwebtoken');
+const {
+  NotFoundError, BadRequestError, ConflictRequestError, UnAuthtorizedError,
+} = require('../errors');
 const User = require('../models/user');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SOLT_ROUND = 10;
 
-exports.getUsers = async (req, res) => {
+exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     res.status(200).send(users);
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    next(err);
   }
 };
 
-exports.getUserById = async (req, res) => {
+exports.getUserById = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (user) {
       res.status(200).send(user);
     } else {
-      res.status(404).send({ message: 'Пользователь не найден' });
+      throw new NotFoundError('Пользователь с указанным id не найден');
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Переданы невалидные данные' });
-    } else {
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      next(new BadRequestError('Переданы невалидные данные'));
     }
+    next(err);
   }
 };
 
 // eslint-disable-next-line consistent-return
-exports.createUser = async (req, res) => {
+exports.createUser = async (req, res, next) => {
   try {
     const { body } = req;
 
     if (!body.email || !body.password) {
-      res.status(400).send({ message: 'Не верный email или пароль' });
+      throw new BadRequestError('Не верный email или пароль');
     }
 
     const salt = await bcrypt.genSalt(SOLT_ROUND);
@@ -50,16 +52,16 @@ exports.createUser = async (req, res) => {
     res.status(201).send(user);
   } catch (err) {
     if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
-      return res.status(409).send({ message: 'Такой пользователь уже существует' });
+      next(new ConflictRequestError('Такой пользователь уже существует'));
     }
     if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Переданы невалидные данные', error: err });
+      next(new BadRequestError('Переданы невалидные данные'));
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере', error: err });
+    next(err);
   }
 };
 
-exports.updateUserInfo = async (req, res) => {
+exports.updateUserInfo = async (req, res, next) => {
   const { name, about } = req.body;
   try {
     const userInfo = await User.findByIdAndUpdate(
@@ -70,14 +72,14 @@ exports.updateUserInfo = async (req, res) => {
     res.send(userInfo);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(400).send({ message: 'Переданы невалидные данные' });
+      next(new BadRequestError('Переданы невалидные данные'));
     } else {
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      next(err);
     }
   }
 };
 
-exports.updateUserAvatar = async (req, res) => {
+exports.updateUserAvatar = async (req, res, next) => {
   try {
     const userAvatar = await User.findByIdAndUpdate(
       req.user._id,
@@ -87,14 +89,14 @@ exports.updateUserAvatar = async (req, res) => {
     res.send(userAvatar);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(400).send({ message: 'Переданы невалидные данные' });
+      next(new BadRequestError('Переданы невалидные данные'));
     } else {
-      res.status(500).send({ message: 'Произошла ошибка на сервере' });
+      next(err);
     }
   }
 };
 
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const userEmail = await User.findUserByCredentials(email, password);
@@ -107,6 +109,6 @@ exports.login = async (req, res) => {
       res.send({ token });
     }
   } catch (err) {
-    res.status(401).send({ message: err.message });
+    next(new UnAuthtorizedError('Пользователь не авторизован'));
   }
 };
