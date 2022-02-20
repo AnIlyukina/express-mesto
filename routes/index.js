@@ -5,6 +5,7 @@ const { createUser, login } = require('../controllers/users');
 const { userRoutes } = require('./users');
 
 const { cardsRoutes } = require('./cards');
+// const { validateRegisterBody } = require('../middlewares/validation');
 
 const routes = express.Router();
 
