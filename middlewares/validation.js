@@ -1,39 +1,61 @@
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, CelebrateError } = require('celebrate');
 const validator = require('validator');
 
-const validateRegisterBody = celebrate({
-  body: {
-    // name: Joi.string().required().min(2).max(30),
+const validateUrl = (value) => {
+  if (!validator.isURL(value)) {
+    throw new CelebrateError('Некорректный URL');
+  }
+  return value;
+};
 
-    // about: Joi.string().required().min(2).max(20),
+const validateUser = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
+    avatar: Joi.string().required().custom(validateUrl),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+});
 
-    // avatar: Joi.string().custom((value, helpers) => {
-    //   if (validator.isEmail(value)) {
-    //     return value;
-    //   }
-    //   return helpers.message('Невалидный email');
-    // }).required().messages({
-    //   'any.required': 'Обязательное поле',
-    // }),
+const validateCard = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    link: Joi.string().required().custom(validateUrl),
+  }),
+});
 
-    email: Joi.string().required().custom((value, helpers) => {
-      if (validator.isEmail(value)) {
-        return value;
-      }
-      return helpers.message('Невалидный email');
-    }).messages({
-      'any.required': 'Обязательное поле',
-    }),
+const validateId = celebrate({
+  params: Joi.object().keys({
+    _id: Joi.string().alphanum().hex().length(30),
+  }),
+});
 
-    password: Joi.string().min(2).max(30).required()
-      .messages({
-        'string.min': 'Минимальная длина поля 2 символа',
-        'string.max': 'Максимальная длина поля 30 символов',
-        'any.required': 'Обязательное поле',
-      }),
-  },
+const validateUserUpdate = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
+  }),
+});
+
+const validateAvatar = celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().required().custom(validateUrl),
+  }),
+});
+
+const validateLogin = celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
 });
 
 module.exports = {
-  validateRegisterBody,
+  validateLogin,
+  validateAvatar,
+  validateUserUpdate,
+  validateUser,
+  validateCard,
+  validateId,
 };
