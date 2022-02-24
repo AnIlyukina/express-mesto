@@ -28,8 +28,15 @@ exports.createCard = async (req, res, next) => {
 
 exports.deleteCard = async (req, res, next) => {
   try {
-    const card = await Card.findByIdAndDelete(req.params.cardId);
-    if (card) {
+    const { cardId } = req.params;
+    const userId = req.user.Id;
+
+    const card = await Card.findById(cardId);
+    if (card.owner !== userId) {
+      throw new ForbiddenError('Данную карточку нельзя удалить');
+    }
+    const isDeletedCard = await Card.findByIdAndDelete(cardId);
+    if (isDeletedCard) {
       res.status(200).send(card);
     } else {
       throw new ForbiddenError('Пользователь не найден');

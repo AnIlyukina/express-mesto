@@ -1,6 +1,5 @@
-// eslint-disable-next-line import/no-unresolved
 const bcrypt = require('bcryptjs');
-// eslint-disable-next-line import/no-unresolved
+
 const jwt = require('jsonwebtoken');
 const {
   NotFoundError, BadRequestError, ConflictRequestError, UnAuthtorizedError,
@@ -36,7 +35,6 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
-// eslint-disable-next-line consistent-return
 exports.createUser = async (req, res, next) => {
   try {
     const { body } = req;
@@ -93,6 +91,22 @@ exports.updateUserAvatar = async (req, res, next) => {
     } else {
       next(err);
     }
+  }
+};
+
+exports.getMyUser = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    const currentUser = await User.findById(_id);
+    if (!currentUser) {
+      throw new NotFoundError('Пользователь с указанным id не найден');
+    }
+    res.send(currentUser);
+  } catch (err) {
+    if (err.name === 'CastError') {
+      next(new BadRequestError('Переданы невалидные данные'));
+    }
+    next(err);
   }
 };
 
