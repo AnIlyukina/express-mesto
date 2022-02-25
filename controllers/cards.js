@@ -1,4 +1,4 @@
-const { BadRequestError, ForbiddenError } = require('../errors');
+const { BadRequestError, ForbiddenError, NotFoundError } = require('../errors');
 const Card = require('../models/card');
 
 exports.getCards = async (req, res, next) => {
@@ -29,17 +29,20 @@ exports.createCard = async (req, res, next) => {
 exports.deleteCard = async (req, res, next) => {
   try {
     const { cardId } = req.params;
-    const userId = req.user.Id;
+    const userId = req.user._id;
 
     const card = await Card.findById(cardId);
-    if (card.owner !== userId) {
+    if (!card) {
+      throw new ForbiddenError('Пользователь не найден');
+    }
+    if (!card.owner.equals(userId)) {
       throw new ForbiddenError('Данную карточку нельзя удалить');
     }
     const isDeletedCard = await Card.findByIdAndDelete(cardId);
     if (isDeletedCard) {
       res.status(200).send(card);
     } else {
-      throw new ForbiddenError('Пользователь не найден');
+      throw new NotFoundError('Данная карточка не найдена');
     }
   } catch (err) {
     if (err.name === 'CastError') {
@@ -59,7 +62,7 @@ exports.likeCard = async (req, res, next) => {
     if (cardLike) {
       res.status(200).send(cardLike);
     } else {
-      throw new ForbiddenError('Пользователь не найден');
+      throw new NotFoundError('Данная карточка не найдена');
     }
   } catch (err) {
     if (err.name === 'CastError') {
@@ -79,7 +82,7 @@ exports.dislikeCard = async (req, res, next) => {
     if (cardDislike) {
       res.status(200).send(cardDislike);
     } else {
-      throw new ForbiddenError('Пользователь не найден');
+      throw new NotFoundError('Данная карточка не найдена');
     }
   } catch (err) {
     if (err.name === 'CastError') {

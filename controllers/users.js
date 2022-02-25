@@ -47,7 +47,14 @@ exports.createUser = async (req, res, next) => {
     body.password = await bcrypt.hash(body.password, salt);
     const user = await User.create(body);
 
-    res.status(201).send(user);
+    res.status(201).send({
+      data: {
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      },
+    });
   } catch (err) {
     if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
       next(new ConflictRequestError('Такой пользователь уже существует'));
